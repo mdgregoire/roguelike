@@ -57,7 +57,7 @@ def main():
 
         render_all(console, entities, game_map, fov_map, fov_recompute, screen_width, screen_height, colors)
         fov_recompute = False
-        
+
         libtcod.console_flush()
 
         clear_all(console, entities)
