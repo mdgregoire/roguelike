@@ -1,7 +1,14 @@
 import tcod as libtcod
+from enum import Enum
 
 
-def render_all(console, entities, game_map, fov_map, fov_recompute, screen_width, screen_height, colors):
+class RenderOrder(Enum):
+    CORPSE = 1
+    ITEM = 2
+    ACTOR = 3
+
+
+def render_all(console, entities, player, game_map, fov_map, fov_recompute, screen_width, screen_height, colors):
     # Draw all tiles on the game map, using fov
     if fov_recompute:
         for y in range(game_map.height):
@@ -23,9 +30,16 @@ def render_all(console, entities, game_map, fov_map, fov_recompute, screen_width
                     else:
                         libtcod.console_set_char_background(console, x, y, colors.get('dark_ground'), libtcod.BKGND_SET)
 
+    entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
+
     # Draw all entities on the list
-    for entity in entities:
+    for entity in entities_in_render_order:
         draw_entity(console, entity, fov_map)
+
+    # Health Bar
+    libtcod.console_set_default_foreground(console, libtcod.white)
+    libtcod.console_print_ex(console, 1, screen_height - 2, libtcod.BKGND_NONE, libtcod.LEFT,
+                             'HP: {0:02}/{1:02}'.format(player.fighter.hp, player.fighter.max_hp))
 
     libtcod.console_blit(console, 0, 0, screen_width, screen_height, 0, 0, 0)
 
