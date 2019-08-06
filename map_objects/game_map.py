@@ -1,3 +1,5 @@
+from random import randint
+
 from map_objects.rectangle import Rectangle
 from map_objects.tile import Tile
 
@@ -13,15 +15,53 @@ class GameMap:
         tiles = [[Tile(True) for y in range(self.height)] for x in range(self.width)]
         return tiles
 
-    def make_map(self):
-        # Create 2 rooms for demonstration purposes
-        room1 = Rectangle(20, 15, 10, 15)
-        room2 = Rectangle(35, 15, 10, 15)
+    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player):
+        rooms = []
+        num_rooms = 0
 
-        self.create_room(room1)
-        self.create_room(room2)
+        for r in range(max_rooms):
+            # random width and height
+            w = randint(room_min_size, room_max_size)
+            h = randint(room_min_size, room_max_size)
+            # Random position without going outside of the map boundaries
+            x = randint(0, map_width - w - 1)
+            y = randint(0, map_height - h - 1)
 
-        self.create_h_tunnel(25, 40, 23)
+            # Use Rectangle class for room creation and checking if they overlap
+            new_room = Rectangle(x, y, w, h)
+
+            for other_room in rooms:
+                if new_room.intersect(other_room):
+                    break
+            else:
+                # This means no intersections, so the room is valid
+                # 'Paint' the room to the maps tiles
+                self.create_room(new_room)
+                # create and store center coordinates of the new room
+                (new_x, new_y) = new_room.center()
+
+                if num_rooms == 0:
+                    # This is the first generated room, where the player will start at
+                    player.x = new_x
+                    player.y = new_y
+                else:
+                    # For all rooms after the first we need to connect it to the previous room with a tunnel
+
+                    # Center coordinates of previous room
+                    (prev_x, prev_y) = rooms[num_rooms - 1].center()
+
+                    # Flip a coin
+                    if randint(0, 1) == 1:
+                        # Move horizontally then vertically
+                        self.create_h_tunnel(prev_x, new_x, prev_y)
+                        self.create_v_tunnel(prev_y, new_y, new_x)
+                    else:
+                        # Move vertically then horizontally
+                        self.create_v_tunnel(prev_y, new_y, prev_x)
+                        self.create_h_tunnel(prev_x, new_x, new_y)
+                # append the new room to the list of rooms
+                rooms.append(new_room)
+                num_rooms += 1
 
     def create_room(self, room):
         # Iterate through the tiles in a rectangle and make them passable
