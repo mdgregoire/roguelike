@@ -12,5 +12,4 @@ class BasicMonster:
             elif target.fighter.hp > 0:
                 attack_results = monster.fighter.attack(target)
                 results.extend(attack_results)
-
         return results
