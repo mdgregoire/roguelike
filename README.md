@@ -2,6 +2,6 @@ Python Roguelike game following the tutorial from http://rogueliketutorials.com
 
 using:
 
-pyhton 3,
+python 3,
 
 tcod
